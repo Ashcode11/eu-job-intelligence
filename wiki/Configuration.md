@@ -17,6 +17,7 @@ All settings live in `.env` (copy it from `.env.example`). Never commit `.env`.
 | `LLM_CHAT_MODEL` | `llama3.2:3b` | AI model for text |
 | `LLM_EMBEDDING_MODEL` | `nomic-embed-text` | AI model for meaning-based search |
 | `JOB_EXPIRY_DAYS` | `21` | Mark a job expired if it hasn't been seen for this many days |
+| `ADZUNA_APP_ID` / `ADZUNA_APP_KEY` | empty | Optional free [Adzuna](https://developer.adzuna.com/) key. After adding it, enable the `adzuna` source |
 | `LOG_JSON` | `true` | Structured JSON logs (`false` = human-readable) |
 
 ## Ports already in use?

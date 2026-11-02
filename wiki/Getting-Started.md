@@ -44,7 +44,8 @@ Check that everything is healthy:
 docker compose ps
 ```
 
-You should see `postgres`, `redis`, `backend` and `job-discovery-worker` as **healthy**.
+You should see `postgres`, `redis`, `backend` and `job-discovery-worker` as **healthy**,
+and `scheduler` as **running**.
 `migrate` shows **exited (0)**. That is correct: it sets up the database once, then stops.
 
 ## Step 4: Load sample data
@@ -53,7 +54,11 @@ You should see `postgres`, `redis`, `backend` and `job-discovery-worker` as **he
 docker compose exec backend python -m scripts.seed
 ```
 
-This loads a sample Cloud Architect profile and 8 **made-up** jobs, one per country.
+This loads a sample Cloud Architect profile, 16 real job sources (Greenhouse, Lever,
+Arbeitnow, Adzuna) and 8 **made-up** jobs, one per country.
+
+Real jobs are collected every day at 06:00 UTC. To collect them now, see
+[Using the API](Using-the-API.md#find-new-jobs-right-now).
 
 ## Step 5: Try it
 

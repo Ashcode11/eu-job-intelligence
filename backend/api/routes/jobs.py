@@ -89,6 +89,7 @@ async def list_jobs(
     min_salary_eur: Annotated[int | None, Query(ge=0)] = None,
     job_status: Annotated[JobStatus | None, Query(alias="status")] = JobStatus.ACTIVE,
     bookmarked: bool | None = None,
+    include_duplicates: bool = False,
     sort: JobSort = "match_score",
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 25,
@@ -96,6 +97,9 @@ async def list_jobs(
     stmt = _base_query(candidate.id)
     if job_status is not None:
         stmt = stmt.where(Job.status == job_status)
+    if not include_duplicates:
+        # The same role found on several boards is shown once (the first one discovered).
+        stmt = stmt.where(Job.canonical_job_id.is_(None))
     if q:
         like = f"%{q}%"
         stmt = stmt.where(

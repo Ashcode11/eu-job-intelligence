@@ -91,7 +91,6 @@ services:
       resources:
         limits: { cpus: "1.0", memory: 512m }
 
-  # Phase 1 runs the `system` + `discovery` queues; connectors arrive in Phase 2.
   job-discovery-worker:
     <<: *python-service
     command: ["celery", "-A", "workers.celery_app", "worker", "-Q", "discovery,system",
@@ -108,6 +107,18 @@ services:
     deploy:
       resources:
         limits: { cpus: "1.0", memory: 512m }
+
+  # Celery beat: every 5 minutes it enqueues searches whose cron is due; daily job expiry.
+  scheduler:
+    <<: *python-service
+    command: ["celery", "-A", "workers.celery_app", "beat", "--loglevel", "INFO",
+              "--schedule", "/tmp/celerybeat-schedule"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 256m }
 
   ollama:
     profiles: ["ollama"]

@@ -24,7 +24,7 @@ COPY --chown=app:app workers ./workers
 COPY --chown=app:app agents ./agents
 COPY --chown=app:app connectors ./connectors
 COPY --chown=app:app scripts ./scripts
-COPY --chown=app:app data/sample ./data/sample
+COPY --chown=app:app data ./data
 USER app
 EXPOSE 8000
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

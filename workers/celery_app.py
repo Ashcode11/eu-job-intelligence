@@ -1,6 +1,7 @@
 """Celery application shared by every worker. Each worker container subscribes to its own queue."""
 
 from celery import Celery
+from celery.schedules import crontab
 from celery.signals import setup_logging
 
 from common.config import get_settings
@@ -12,7 +13,7 @@ celery_app = Celery(
     "eujobs",
     broker=settings.broker_url,
     backend=settings.result_backend,
-    include=["workers.tasks.system"],
+    include=["workers.tasks.system", "workers.tasks.discovery"],
 )
 
 celery_app.conf.update(
@@ -35,7 +36,17 @@ celery_app.conf.update(
         "application.*": {"queue": "application"},
         "orchestrator.*": {"queue": "orchestrator"},
     },
-    beat_schedule={},  # populated from search_configurations in Phase 2
+    beat_schedule={
+        # Each search configuration has its own cron; this tick enqueues the due ones.
+        "discovery-dispatch-due": {
+            "task": "discovery.dispatch_due",
+            "schedule": crontab(minute="*/5"),
+        },
+        "discovery-expire-jobs": {
+            "task": "discovery.expire_jobs",
+            "schedule": crontab(hour=3, minute=15),
+        },
+    },
 )
 
 

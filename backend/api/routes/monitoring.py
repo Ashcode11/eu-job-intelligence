@@ -74,6 +74,7 @@ async def overview(candidate: CandidateDep, session: SessionDep) -> OverviewStat
                 JobMatch, and_(JobMatch.job_id == Job.id, JobMatch.candidate_id == candidate.id)
             )
             .outerjoin(VisaAssessment, VisaAssessment.job_id == Job.id)
+            .where(Job.canonical_job_id.is_(None))
         )
     ).one()
     apps = (

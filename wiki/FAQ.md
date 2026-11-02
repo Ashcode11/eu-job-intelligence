@@ -26,6 +26,15 @@ Yes. Everything stays on your computer, in your own database.
 **My computer has 8 GB RAM. Will it work?**
 Yes, with the small `llama3.2:3b` model. On a Mac, run Ollama natively for GPU speed.
 
+**Which companies does it search?**
+It starts with 12 Greenhouse companies (including N26, HelloFresh, Celonis, Adyen, Elastic,
+Datadog, GitLab, MongoDB, SumUp and Wolt), 2 Lever companies, and the Arbeitnow board. Add
+any company that uses Greenhouse or Lever with one API call (see
+[Using the API](Using-the-API.md#job-sources)).
+
+**Why don't I see EURES jobs?**
+EURES has no open public API. Rather than scraping it, the project waits for an official API.
+
 **Can I add more countries?**
 Yes. Add any two-letter country code to `preferred_countries`.
 

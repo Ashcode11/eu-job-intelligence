@@ -1,0 +1,197 @@
+{
+  "_comment": "Default job sources. Board tokens were verified live against the public APIs on 2026-11-02. Add your own via POST /api/v1/sources.",
+  "sources": [
+    {
+      "key": "greenhouse:n26",
+      "name": "N26 (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "n26",
+        "company_name": "N26"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:hellofresh",
+      "name": "HelloFresh (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "hellofresh",
+        "company_name": "HelloFresh"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:celonis",
+      "name": "Celonis (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "celonis",
+        "company_name": "Celonis"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:adyen",
+      "name": "Adyen (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "adyen",
+        "company_name": "Adyen"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:elastic",
+      "name": "Elastic (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "elastic",
+        "company_name": "Elastic"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:datadog",
+      "name": "Datadog (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "datadog",
+        "company_name": "Datadog"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:gitlab",
+      "name": "GitLab (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "gitlab",
+        "company_name": "GitLab"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:mongodb",
+      "name": "MongoDB (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "mongodb",
+        "company_name": "MongoDB"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:trivago",
+      "name": "trivago (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "trivago",
+        "company_name": "trivago"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:sumup",
+      "name": "SumUp (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "sumup",
+        "company_name": "SumUp"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:wolt",
+      "name": "Wolt (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "wolt",
+        "company_name": "Wolt"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "greenhouse:solarisbank",
+      "name": "Solaris (Greenhouse)",
+      "connector": "greenhouse",
+      "config": {
+        "board_token": "solarisbank",
+        "company_name": "Solaris"
+      },
+      "terms_url": "https://developers.greenhouse.io/job-board.html",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "lever:spotify",
+      "name": "Spotify (Lever)",
+      "connector": "lever",
+      "config": {
+        "site": "spotify",
+        "company_name": "Spotify"
+      },
+      "terms_url": "https://github.com/lever/postings-api",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "lever:swile",
+      "name": "Swile (Lever)",
+      "connector": "lever",
+      "config": {
+        "site": "swile",
+        "company_name": "Swile"
+      },
+      "terms_url": "https://github.com/lever/postings-api",
+      "enabled": true,
+      "rate_limit_per_minute": 30
+    },
+    {
+      "key": "arbeitnow",
+      "name": "Arbeitnow (Germany)",
+      "connector": "arbeitnow",
+      "config": {
+        "max_pages": 3,
+        "default_country": "DE"
+      },
+      "terms_url": "https://www.arbeitnow.com/blog/job-board-api",
+      "enabled": true,
+      "rate_limit_per_minute": 10
+    },
+    {
+      "key": "adzuna",
+      "name": "Adzuna (needs ADZUNA_APP_ID/KEY)",
+      "connector": "adzuna",
+      "config": {
+        "results_per_page": 50,
+        "max_pages": 2
+      },
+      "terms_url": "https://developer.adzuna.com/",
+      "enabled": false,
+      "rate_limit_per_minute": 20
+    }
+  ]
+}

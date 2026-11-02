@@ -1,7 +1,8 @@
 # How It Works
 
-> **Status:** this page describes the full design. Today the foundation is working, job
-> discovery is being built, and the AI agents come in Phase 3. See the [Roadmap](Roadmap.md).
+> **Status:** this page describes the full design. Today the foundation and **job discovery**
+> are working. Matching, visa, salary and application agents come in Phase 3.
+> See the [Roadmap](Roadmap.md).
 
 ## The big picture
 
@@ -24,6 +25,24 @@ it retries and records what happened.
 | **Visa Intelligence** | Reads the job post for visa and relocation evidence. |
 | **Salary Intelligence** | Converts salaries to yearly EUR and estimates take-home pay and savings. |
 | **Application Prep** | Drafts a tailored CV, cover letter and interview notes. It never sends them. |
+
+## How job discovery works (live today)
+
+1. **Every 5 minutes** the scheduler checks your saved searches. A search runs when its
+   schedule is due (default: daily at 06:00 UTC).
+2. **Each source is fetched politely**: it checks robots.txt, waits between requests and
+   retries if the site is busy. If one source fails, the others still run.
+3. **Only relevant jobs are kept**:
+   - the title must contain all words of one of your keywords (in any order), so
+     "cloud architect" matches "Senior Cloud **Solutions** Architect"
+   - the country must be one of yours. Europe-wide remote jobs ("Remote, EMEA") are kept.
+4. **No duplicates**:
+   - the same job seen again is updated, never added twice
+   - the same role posted on two boards is shown once
+5. **Old jobs disappear**:
+   - a job removed from a company's board is marked **closed**
+   - a job not seen for 21 days, or past its deadline, is marked **expired**
+6. Every run is recorded: how many jobs were fetched, kept or skipped, and why.
 
 ## How a job is scored
 
@@ -65,6 +84,7 @@ They are stored separately, and every estimate lists its assumptions (tax, rent,
 |---|---|
 | `backend` | the API you talk to |
 | `job-discovery-worker` | fetches jobs in the background |
+| `scheduler` | starts searches on time and expires old jobs |
 | `postgres` | stores everything (plus pgvector for AI search) |
 | `redis` | the queue between the API and the workers |
 | `migrate` | sets up the database tables, then stops |

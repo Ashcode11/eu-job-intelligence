@@ -20,14 +20,16 @@ It is being built to:
 | Step | What it does | Status |
 |---|---|---|
 | 1. Foundation | Database, API, profile, job list, application tracker | ✅ Working and tested |
-| 2. Job discovery | Collect jobs from public job boards | 🔨 In progress |
-| 3. AI agents | Matching, visa, salary and application helpers | ⏳ Planned |
+| 2. Job discovery | Collect jobs from public job boards every day | ✅ Working and tested |
+| 3. AI agents | Matching, visa, salary and application helpers | ⏳ Next |
 | 4. Dashboard | Web interface | ⏳ Planned |
 | 5. Kubernetes | Run on a local Kubernetes cluster | ⏳ Planned |
 | 6. Monitoring | Grafana dashboards and more tests | ⏳ Planned |
 
-Today you can store your profile, skills and resumes, browse jobs (sample data for now)
-and track your applications through the API.
+Today it collects real cloud architect jobs from 15 public job sources every morning,
+removes duplicates, closes jobs that disappear, and lets you browse them and track your
+applications through the API. In its first live run it checked about 3,000 postings and
+kept 18 relevant ones in the target countries.
 
 ---
 
@@ -53,7 +55,7 @@ Open `.env` and replace every `CHANGE_ME` with your own password or key.
 docker compose up -d --build
 ```
 
-**3. Load the sample profile and sample jobs**
+**3. Load the sample profile, the job sources and sample jobs**
 
 ```bash
 docker compose exec backend python -m scripts.seed
@@ -65,6 +67,11 @@ Go to **http://localhost:8081/docs**, click **Authorize** and paste one of your
 `API_KEYS` from `.env`. You can now try every endpoint in the browser.
 
 > The sample jobs are made up, for testing only.
+
+**5. Find real jobs now** (otherwise it runs automatically every day at 06:00 UTC)
+
+In the API page, run `POST /api/v1/discovery/run` with body `{}`. Then look at
+`GET /api/v1/jobs` after about a minute.
 
 ---
 

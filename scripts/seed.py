@@ -26,7 +26,8 @@ from database.models import (
 )
 from database.session import create_engine, create_session_factory
 
-SAMPLE_DIR = Path(__file__).resolve().parent.parent / "data" / "sample"
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+SAMPLE_DIR = DATA_DIR / "sample"
 log = get_logger("seed")
 
 
@@ -51,6 +52,37 @@ async def seed_candidate(session) -> Candidate:
         session.add(SearchConfiguration(candidate_id=candidate.id, **c))
     log.info("candidate_created", candidate_id=str(candidate.id), skills=len(skills))
     return candidate
+
+
+async def seed_sources(session) -> int:
+    """Insert default sources that don't exist yet. Never overwrites your edits."""
+    from connectors.registry import get_connector_class
+
+    data = json.loads((DATA_DIR / "sources.json").read_text())
+    existing = set(await session.scalars(select(JobSource.key)))
+    created = 0
+    for src in data["sources"]:
+        if src["key"] in existing:
+            continue
+        get_connector_class(src["connector"]).config_model.model_validate(src["config"])
+        session.add(
+            JobSource(
+                key=src["key"],
+                name=src["name"],
+                connector=src["connector"],
+                config=src["config"],
+                source_type=SourceType.ATS_BOARD
+                if src["connector"] in ("greenhouse", "lever")
+                else SourceType.API,
+                terms_url=src.get("terms_url"),
+                enabled=src["enabled"],
+                rate_limit_per_minute=src["rate_limit_per_minute"],
+                respects_robots_txt=True,
+            )
+        )
+        created += 1
+    log.info("sources_loaded", created=created, total=len(data["sources"]))
+    return created
 
 
 async def seed_jobs(session) -> int:
@@ -127,6 +159,7 @@ async def main(with_jobs: bool) -> None:
     factory = create_session_factory(engine)
     async with factory() as session:
         await seed_candidate(session)
+        await seed_sources(session)
         if with_jobs:
             await seed_jobs(session)
         await session.commit()

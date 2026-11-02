@@ -28,6 +28,7 @@ curl -H "X-API-Key: $KEY" "http://localhost:8081/api/v1/jobs?visa=explicit_spons
 ```
 
 Filters: `q`, `country`, `company`, `visa`, `min_score`, `min_salary_eur`, `bookmarked`, `status`.
+The same role found on several boards is shown once (add `include_duplicates=true` to see all).
 Sorting: `sort=match_score` (default), `posted_at`, `salary` or `discovered_at`.
 
 ## One job in detail
@@ -35,6 +36,48 @@ Sorting: `sort=match_score` (default), `posted_at`, `salary` or `discovered_at`.
 ```bash
 curl -H "X-API-Key: $KEY" "http://localhost:8081/api/v1/jobs/<job-id>"
 ```
+
+## Find new jobs right now
+
+Discovery runs every day by itself. To run it now:
+
+```bash
+curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/discovery/run -d '{}'
+```
+
+It returns a `task_id`. Check progress with
+`GET /api/v1/agents/tasks/<task_id>`. A full run takes about a minute.
+
+## Job sources
+
+```bash
+# list sources and how many active jobs each has
+curl -H "X-API-Key: $KEY" http://localhost:8081/api/v1/sources
+# add a company that uses Greenhouse (the token is in its jobs URL: boards.greenhouse.io/<token>)
+curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/sources \
+  -d '{"key":"greenhouse:acme","name":"Acme","connector":"greenhouse","config":{"board_token":"acme"}}'
+# turn a source off
+curl -X PATCH -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/sources/<source-id> -d '{"enabled":false}'
+# see the settings each connector accepts
+curl -H "X-API-Key: $KEY" http://localhost:8081/api/v1/discovery/connectors
+```
+
+Connectors: `greenhouse` (`board_token`), `lever` (`site`), `arbeitnow`,
+`adzuna` (needs keys in `.env`), `rss` (`feed_url`).
+
+## Saved searches
+
+```bash
+curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/candidate/search-configs \
+  -d '{"name":"Nordics","keywords":["cloud architect","platform architect"],
+       "countries":["SE","DK","FI"],"schedule_cron":"0 7 * * 1-5"}'
+```
+
+`schedule_cron` is a standard cron line in UTC (`0 7 * * 1-5` = weekdays at 07:00).
 
 ## Track an application
 

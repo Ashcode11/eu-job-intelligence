@@ -6,13 +6,14 @@ import pytest
 from sqlalchemy import func, select
 
 from database.models import AuditLog
-from scripts.seed import seed_candidate, seed_jobs
+from scripts.seed import seed_candidate, seed_jobs, seed_sources
 
 pytestmark = pytest.mark.integration
 
 
 async def _seed(session, jobs: bool = True):
     await seed_candidate(session)
+    await seed_sources(session)
     if jobs:
         await seed_jobs(session)
     await session.commit()
@@ -210,3 +211,63 @@ async def test_rate_limit(client, test_settings, monkeypatch):
     monkeypatch.setattr(test_settings, "rate_limit_default", "3/minute")
     codes = [(await client.get("/api/v1/agents/summary")).status_code for _ in range(5)]
     assert 429 in codes
+
+
+async def test_sources_api(client, session):
+    await _seed(session, jobs=False)
+    sources = (await client.get("/api/v1/sources")).json()
+    keys = {s["key"] for s in sources}
+    assert {"greenhouse:n26", "lever:spotify", "arbeitnow", "adzuna"} <= keys
+    adzuna = next(s for s in sources if s["key"] == "adzuna")
+    assert adzuna["enabled"] is False
+
+    r = await client.post(
+        "/api/v1/sources",
+        json={
+            "key": "greenhouse:example",
+            "name": "Example",
+            "connector": "greenhouse",
+            "config": {"board_token": "example"},
+        },
+    )
+    assert r.status_code == 201, r.text
+    assert r.json()["source_type"] == "ats_board"
+    bad = await client.post(
+        "/api/v1/sources",
+        json={
+            "key": "greenhouse:bad",
+            "name": "Bad",
+            "connector": "greenhouse",
+            "config": {"board_token": "../../etc"},
+        },
+    )
+    assert bad.status_code == 422
+    unknown = await client.post(
+        "/api/v1/sources",
+        json={"key": "x", "name": "X", "connector": "linkedin-scraper", "config": {}},
+    )
+    assert unknown.status_code == 422
+
+    sid = r.json()["id"]
+    r = await client.patch(f"/api/v1/sources/{sid}", json={"enabled": False})
+    assert r.json()["enabled"] is False
+
+    connectors = (await client.get("/api/v1/discovery/connectors")).json()
+    assert {c["name"] for c in connectors} == {"adzuna", "arbeitnow", "greenhouse", "lever", "rss"}
+
+
+async def test_duplicates_hidden_from_job_list(client, session):
+    await _seed(session)
+    from sqlalchemy import update
+
+    from database.models import Job
+
+    jobs = (await client.get("/api/v1/jobs")).json()["items"]
+    await session.execute(
+        update(Job).where(Job.id == jobs[1]["id"]).values(canonical_job_id=jobs[0]["id"])
+    )
+    await session.commit()
+    assert (await client.get("/api/v1/jobs")).json()["total"] == 7
+    assert (await client.get("/api/v1/jobs", params={"include_duplicates": True})).json()[
+        "total"
+    ] == 8

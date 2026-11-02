@@ -45,6 +45,8 @@ class Settings(BaseSettings):
 
     # Discovery
     job_expiry_days: int = 21
+    adzuna_app_id: str | None = None
+    adzuna_app_key: SecretStr | None = None
 
     @field_validator("api_keys", mode="before")
     @classmethod

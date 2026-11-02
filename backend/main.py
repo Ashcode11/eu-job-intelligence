@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from backend.api.routes import applications, candidate, health, jobs, monitoring
+from backend.api.routes import applications, candidate, discovery, health, jobs, monitoring
 from backend.middleware import RequestContextMiddleware
 from backend.security import rate_limit, require_api_key
 from common.config import Settings, get_settings
@@ -85,7 +85,7 @@ def create_app(settings: Settings | None = None, engine: AsyncEngine | None = No
     app.include_router(health.router)
 
     api = APIRouter(prefix=API_PREFIX, dependencies=[Depends(require_api_key), Depends(rate_limit)])
-    for module in (candidate, jobs, applications, monitoring):
+    for module in (candidate, jobs, applications, monitoring, discovery):
         api.include_router(module.router)
     app.include_router(api)
     return app
