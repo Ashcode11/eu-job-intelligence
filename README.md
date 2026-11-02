@@ -1,200 +1,96 @@
 # EU Job Intelligence
 
-A self-hosted, multi-agent platform that discovers European Cloud Architect opportunities,
-scores them against your profile, analyses visa sponsorship and salary evidence, and
-prepares application drafts. **Nothing is ever submitted or sent without your explicit
-approval.** It runs on local models (Ollama), so no paid LLM API is needed.
+**A personal AI job-search assistant for European cloud jobs that runs on your own computer.**
 
-- Architecture, service boundaries, data model and hardware sizing: [docs/architecture.md](docs/architecture.md)
-- Problems and fixes: [docs/troubleshooting.md](docs/troubleshooting.md)
-- Interactive API docs (once running): http://localhost:8081/docs
+It is being built to:
 
-## Build status
+1. **Find** cloud architect jobs across Europe (Germany, Netherlands, Ireland, the Nordics, Benelux and more).
+2. **Score** each job against your skills and experience.
+3. **Check visa sponsorship**, but only from evidence written in the job post, never from guesses.
+4. **Compare salaries**, keeping real advertised numbers separate from estimates.
+5. **Help you apply** by drafting CVs, cover letters and interview notes.
 
-| Phase | Scope | Status |
+**You stay in control.** It never applies, sends messages or changes your profile on its own.
+**It's free to run.** It uses local AI models (Ollama), so no paid AI API is needed.
+
+---
+
+## Where it stands today
+
+| Step | What it does | Status |
 |---|---|---|
-| 1. Foundation | Schema + migrations, FastAPI backend, Postgres/pgvector, Redis, Celery skeleton, Compose | **Done**, tested |
-| 2. Job discovery | Greenhouse/Lever/Adzuna/EURES/RSS connectors, dedup, expiry, scheduling | Not started |
-| 3. AI intelligence | Ollama, CV parsing, matching, visa, salary, LangGraph orchestrator | Not started |
-| 4. Frontend | Next.js dashboard | Not started |
-| 5. Kubernetes | k3d manifests + Helm chart | Not started |
-| 6. Observability | Prometheus/Grafana dashboards, failure-recovery tests | Partial (`/metrics` endpoint exists) |
+| 1. Foundation | Database, API, profile, job list, application tracker | ✅ Working and tested |
+| 2. Job discovery | Collect jobs from public job boards | 🔨 In progress |
+| 3. AI agents | Matching, visa, salary and application helpers | ⏳ Planned |
+| 4. Dashboard | Web interface | ⏳ Planned |
+| 5. Kubernetes | Run on a local Kubernetes cluster | ⏳ Planned |
+| 6. Monitoring | Grafana dashboards and more tests | ⏳ Planned |
 
-## Quick start (Docker Compose)
+Today you can store your profile, skills and resumes, browse jobs (sample data for now)
+and track your applications through the API.
 
-Requirements: Docker Desktop (or Engine) with Compose v2 and at least 4 GB of memory
-assigned to Docker. See [hardware requirements](docs/architecture.md#6-local-hardware-requirements).
+---
+
+## Start it in 5 minutes
+
+You need [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+**1. Get the code and create your settings file**
 
 ```bash
-cd eu-job-intelligence
-cp .env.example .env
+git clone https://github.com/Ashcode11/eu-job-intelligence.git
 ```
-
-Edit `.env` and replace every `CHANGE_ME` value. To generate secrets:
 
 ```bash
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+cd eu-job-intelligence && cp .env.example .env
 ```
 
-Start the stack. This builds the image, starts Postgres and Redis, runs migrations, then
-starts the API and the discovery worker:
+Open `.env` and replace every `CHANGE_ME` with your own password or key.
+
+**2. Start everything**
 
 ```bash
 docker compose up -d --build
 ```
 
-```bash
-docker compose ps
-```
-
-Load the sample candidate profile (from the brief) and 8 **fictional** sample jobs:
+**3. Load the sample profile and sample jobs**
 
 ```bash
 docker compose exec backend python -m scripts.seed
 ```
 
-Try the API. Replace `$KEY` with a value from `API_KEYS` in `.env`:
+**4. Open the API**
 
-```bash
-curl -s localhost:8081/health/ready
-```
+Go to **http://localhost:8081/docs**, click **Authorize** and paste one of your
+`API_KEYS` from `.env`. You can now try every endpoint in the browser.
 
-```bash
-curl -s -H "X-API-Key: $KEY" localhost:8081/api/v1/candidate | python3 -m json.tool
-```
+> The sample jobs are made up, for testing only.
 
-```bash
-curl -s -H "X-API-Key: $KEY" "localhost:8081/api/v1/jobs?country=DE&country=NL" | python3 -m json.tool
-```
+---
 
-### Fill in your work-authorization details
+## Learn more
 
-The seeded profile leaves citizenship, EU work authorization, sponsorship need and
-relocation **unset on purpose**. The agents never guess these values. `GET
-/api/v1/candidate` lists what is missing in `profile_completeness`. To set them:
+The [wiki](wiki/Home.md) explains everything in simple steps:
 
-```bash
-curl -s -X PATCH -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
-  localhost:8081/api/v1/candidate \
-  -d '{"full_name":"Your Name","citizenship":["IN"],"has_eu_work_authorization":false,
-       "requires_visa_sponsorship":true,"open_to_relocation":true,"min_salary_eur":80000}'
-```
+- [Getting Started](wiki/Getting-Started.md): setup, explained step by step
+- [How It Works](wiki/How-It-Works.md): the agents, in plain words
+- [Your Profile](wiki/Your-Profile.md): what to fill in and why
+- [Using the API](wiki/Using-the-API.md): common tasks with copy-paste commands
+- [Configuration](wiki/Configuration.md): every setting in `.env`
+- [Developer Guide](wiki/Developer-Guide.md): tests, migrations, project layout
+- [Roadmap](wiki/Roadmap.md) and [FAQ](wiki/FAQ.md)
 
-Upload a resume (PDF or DOCX, max `MAX_UPLOAD_MB`):
+Technical deep-dives: [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md)
 
-```bash
-curl -s -H "X-API-Key: $KEY" -F file=@/path/to/cv.pdf -F version_label=main \
-  localhost:8081/api/v1/candidate/resumes
-```
+---
 
-### Optional: local LLM
+## Built with
 
-Phase 3 agents use Ollama. On Apple Silicon, run it natively so it can use the GPU:
+Python · FastAPI · PostgreSQL + pgvector · Redis · Celery · LangGraph · Ollama ·
+Next.js · Docker · Kubernetes (k3d) · Helm · Prometheus · Grafana
 
-```bash
-brew install ollama
-```
+## Responsible by design
 
-```bash
-ollama serve
-```
-
-```bash
-ollama pull llama3.2:3b && ollama pull nomic-embed-text
-```
-
-On Linux, or to keep everything in containers (CPU-only on macOS), use the bundled service
-and set `OLLAMA_BASE_URL=http://ollama:11434` in `.env`:
-
-```bash
-docker compose --profile ollama up -d ollama
-```
-
-```bash
-docker compose exec ollama ollama pull llama3.2:3b
-```
-
-## Running tests
-
-Tests run on the host against the Compose Postgres and Redis. They use a separate
-`eujobs_test` database and Redis DB 15, so your data is untouched.
-
-```bash
-uv sync
-```
-
-```bash
-docker compose up -d postgres redis
-```
-
-```bash
-uv run pytest -v
-```
-
-`uv run pytest tests/unit` needs no services.
-
-## Database migrations
-
-```bash
-docker compose run --rm migrate alembic upgrade head
-```
-
-To create a new migration after changing models in `database/models/`:
-
-```bash
-uv run alembic revision --autogenerate -m "describe change"
-```
-
-## Backups
-
-```bash
-scripts/backup_db.sh
-```
-
-```bash
-scripts/restore_db.sh backups/eujobs-<timestamp>.dump
-```
-
-`backup_db.sh` keeps the newest 14 dumps (`KEEP=n` to change). Schedule it with cron or
-launchd for daily backups.
-
-## API overview
-
-All `/api/v1/*` routes need `X-API-Key` and are rate limited (`RATE_LIMIT_DEFAULT`).
-Every mutation is written to `audit_logs`.
-
-| Area | Endpoints |
-|---|---|
-| Health | `GET /health/live`, `GET /health/ready`, `GET /metrics` |
-| Candidate | `GET/POST/PATCH /candidate`, skills, experiences, resumes, search-configs |
-| Jobs | `GET /jobs` (filters: `q`, `country`, `company`, `visa`, `min_score`, `min_salary_eur`, `bookmarked`, `sort`), `GET /jobs/{id}` |
-| Applications | `GET/POST /applications`, `PATCH/DELETE /applications/{id}` |
-| Monitoring | `GET /stats/overview`, `GET /agents/summary`, `GET /agents/executions`, `POST /agents/ping`, `GET /agents/tasks/{id}` |
-
-## Repository layout
-
-```
-common/          settings, JSON logging, enums
-database/        SQLAlchemy models, Alembic migrations, session factory
-backend/         FastAPI app: routes, schemas, services, security, middleware
-workers/         Celery app + tasks (one image, one queue per worker type)
-connectors/      job-source connectors + normalisation/dedup helpers
-agents/          LangGraph orchestrator and agents (Phase 3)
-frontend/        Next.js dashboard (Phase 4)
-infrastructure/  Dockerfiles, Kubernetes, Helm
-monitoring/      Prometheus + Grafana (Phase 6)
-scripts/         seed, backup, restore
-data/sample/     sample candidate profile and fictional jobs
-tests/           unit + integration
-```
-
-## Responsible use
-
-- Connectors use only public APIs, RSS feeds and public ATS job boards. They respect
-  robots.txt and per-source rate limits, and never log in, solve CAPTCHAs or evade bot
-  protection.
-- Visa classifications always cite evidence (URL + quote). A company is never treated as
-  a sponsor because it employs international staff.
-- Salary *estimates* are kept separate from advertised salaries, and their assumptions
-  are always listed.
-- Interview likelihood is a heuristic estimate, not a prediction backed by hiring data.
+- Uses only public job APIs and feeds. It respects each site's rules and never bypasses logins or CAPTCHAs.
+- Never assumes your visa status or citizenship. You tell it.
+- Every visa or salary conclusion shows its evidence or its assumptions.
