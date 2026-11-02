@@ -1,0 +1,75 @@
+{
+  "_comment": "FICTIONAL sample data for development and tests. Companies and URLs are invented (example.com). Do not apply.",
+  "source": {"key": "sample", "name": "Sample data (fictional)", "source_type": "manual", "connector": "sample"},
+  "jobs": [
+    {
+      "external_id": "sample-001", "company": "Nordlicht Cloud GmbH (sample)", "title": "Senior Cloud Solutions Architect (AWS)",
+      "country": "DE", "city": "Berlin", "remote_type": "hybrid", "employment_type": "full_time", "seniority": "senior",
+      "experience_min_years": 8, "salary_min": 85000, "salary_max": 105000, "salary_currency": "EUR", "salary_period": "year",
+      "salary_raw": "EUR 85,000 - 105,000 gross per year", "posted_days_ago": 2,
+      "required_skills": ["AWS", "Terraform", "Kubernetes", "Cloud Migration", "Java"],
+      "url": "https://example.com/jobs/sample-001",
+      "description": "We are looking for a Senior Cloud Solutions Architect to lead AWS migrations for enterprise clients. You will design landing zones with Terraform, plan database migrations using AWS DMS, and guide teams running Kubernetes. 8+ years of experience required. We offer visa sponsorship and relocation support for candidates moving to Germany, including EU Blue Card applications."
+    },
+    {
+      "external_id": "sample-002", "company": "Grachten Digital B.V. (sample)", "title": "Cloud Migration Architect",
+      "country": "NL", "city": "Amsterdam", "remote_type": "hybrid", "employment_type": "full_time", "seniority": "lead",
+      "experience_min_years": 10, "salary_min": 90000, "salary_max": 115000, "salary_currency": "EUR", "salary_period": "year",
+      "salary_raw": "EUR 90-115k", "posted_days_ago": 5,
+      "required_skills": ["AWS", "Azure", "AWS DMS", "Change Data Capture", "SQL Server", "Terraform"],
+      "url": "https://example.com/jobs/sample-002",
+      "description": "Lead large-scale data centre to cloud migrations across AWS and Azure. Experience with AWS DMS, CDC pipelines and SQL Server to RDS migration is essential. We are a recognised sponsor with the IND and can support highly skilled migrant visa applications. Relocation package available."
+    },
+    {
+      "external_id": "sample-003", "company": "Liffey Systems Ltd (sample)", "title": "Platform Engineering Architect",
+      "country": "IE", "city": "Dublin", "remote_type": "hybrid", "employment_type": "full_time", "seniority": "senior",
+      "experience_min_years": 7, "posted_days_ago": 1,
+      "required_skills": ["Kubernetes", "Helm", "Terraform", "GitLab CI/CD", "Go"],
+      "url": "https://example.com/jobs/sample-003",
+      "description": "Design our internal developer platform on Kubernetes. You will own Helm charts, GitOps workflows and Terraform modules. Strong Go programming experience is a plus. Salary competitive. Applicants must have the right to work in Ireland; we are unable to sponsor work permits for this role."
+    },
+    {
+      "external_id": "sample-004", "company": "Fjord Infra AB (sample)", "title": "DevOps Architect",
+      "country": "SE", "city": "Stockholm", "remote_type": "onsite", "employment_type": "full_time", "seniority": "senior",
+      "experience_min_years": 8, "salary_min": 70000, "salary_max": 80000, "salary_currency": "SEK", "salary_period": "month",
+      "salary_raw": "70 000 - 80 000 SEK/month", "posted_days_ago": 9,
+      "required_skills": ["Azure", "Azure DevOps", "Terraform", "Kubernetes"],
+      "url": "https://example.com/jobs/sample-004",
+      "description": "Join our platform team as DevOps Architect focusing on Azure. You will standardise Azure DevOps pipelines and Terraform modules across 40 product teams. We welcome international applicants and help with relocation to Stockholm."
+    },
+    {
+      "external_id": "sample-005", "company": "Havn Cloud ApS (sample)", "title": "Cloud Engineering Manager",
+      "country": "DK", "city": "Copenhagen", "remote_type": "hybrid", "employment_type": "full_time", "seniority": "manager",
+      "experience_min_years": 10, "posted_days_ago": 14,
+      "required_skills": ["AWS", "People Management", "Kubernetes", "FinOps"],
+      "url": "https://example.com/jobs/sample-005",
+      "description": "Manage a team of 8 cloud engineers running our AWS estate. Experience leading engineering teams, budgeting and FinOps practices required. Fluency in Danish is required for this role."
+    },
+    {
+      "external_id": "sample-006", "company": "Revontuli Tech Oy (sample)", "title": "Azure Solutions Architect",
+      "country": "FI", "city": "Helsinki", "remote_type": "remote", "employment_type": "full_time", "seniority": "senior",
+      "experience_min_years": 6, "salary_min": 6500, "salary_max": 8000, "salary_currency": "EUR", "salary_period": "month",
+      "salary_raw": "6 500 - 8 000 EUR / month", "posted_days_ago": 3,
+      "required_skills": ["Microsoft Azure", "Terraform", "Azure DevOps", "Cloud Security"],
+      "url": "https://example.com/jobs/sample-006",
+      "description": "Remote-first role (Finland-based) designing secure Azure landing zones for public sector customers. Security clearance may be required. Candidates must already hold EU work authorization."
+    },
+    {
+      "external_id": "sample-007", "company": "Atomium Consulting SA (sample)", "title": "Senior Cloud Consultant",
+      "country": "BE", "city": "Brussels", "remote_type": "hybrid", "employment_type": "full_time", "seniority": "senior",
+      "experience_min_years": 7, "posted_days_ago": 6,
+      "required_skills": ["AWS", "Azure", "Cloud Architecture", "Stakeholder Management"],
+      "url": "https://example.com/jobs/sample-007",
+      "description": "Advise enterprise clients on cloud strategy and modernisation across AWS and Azure. French or Dutch is an advantage. Competitive package."
+    },
+    {
+      "external_id": "sample-008", "company": "Kirchberg Finance Cloud S.A. (sample)", "title": "Infrastructure Architect",
+      "country": "LU", "city": "Luxembourg", "remote_type": "onsite", "employment_type": "full_time", "seniority": "senior",
+      "experience_min_years": 10, "salary_min": 95000, "salary_max": 120000, "salary_currency": "EUR", "salary_period": "year",
+      "salary_raw": "EUR 95k - 120k + bonus", "posted_days_ago": 4,
+      "required_skills": ["AWS", "Oracle", "PostgreSQL", "Terraform", "Cloud Security", "Scalability"],
+      "url": "https://example.com/jobs/sample-008",
+      "description": "Architect the hybrid infrastructure of a regulated financial services platform: on-premise Oracle estates, AWS, and PostgreSQL migrations. Visa sponsorship is available for exceptional non-EU candidates; we support work permit applications as a highly qualified worker (EU Blue Card)."
+    }
+  ]
+}
