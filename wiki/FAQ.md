@@ -27,6 +27,10 @@ No. It suggests them, and you choose which to add.
 It's a rough estimate based on how well your profile overlaps the job, not a prediction
 from real hiring data. It's labelled that way everywhere.
 
+**Where do I enter the API key?**
+On the dashboard's first screen. It is stored only in that browser. Use **Forget API key**
+in the sidebar to remove it.
+
 **Is my data private?**
 Yes. Everything stays on your computer, in your own database.
 

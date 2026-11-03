@@ -47,6 +47,17 @@ curl -s -X POST -H "X-API-Key: $KEY" localhost:8081/api/v1/agents/ping
 
 Then fetch `/api/v1/agents/tasks/<task_id>`. The state should be `SUCCESS`.
 
+## Dashboard says the key was not accepted
+
+Use a value from `API_KEYS` in `.env` (not the Postgres or Redis password). If you changed
+`API_KEYS`, restart the backend with `docker compose up -d backend`.
+
+## Dashboard loads but shows errors or empty pages
+
+Check that the backend is healthy (`docker compose ps`). The dashboard forwards `/backend/*`
+to `http://backend:8000` inside Docker. If you renamed the service, rebuild the frontend
+with a matching `BACKEND_INTERNAL_URL` build argument.
+
 ## Integration tests are skipped
 
 `tests/conftest.py` skips integration tests when Postgres or Redis is unreachable. Start

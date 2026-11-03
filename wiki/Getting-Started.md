@@ -44,7 +44,7 @@ Check that everything is healthy:
 docker compose ps
 ```
 
-You should see `postgres`, `redis`, `backend`, `job-discovery-worker`,
+You should see `postgres`, `redis`, `backend`, `frontend`, `job-discovery-worker`,
 `agent-orchestrator`, `matching-worker`, `visa-worker` and `application-worker` as
 **healthy**, and `scheduler` as **running**.
 `migrate` shows **exited (0)**. That is correct: it sets up the database once, then stops.
@@ -61,10 +61,20 @@ Arbeitnow, Adzuna) and 8 **made-up** jobs, one per country.
 Real jobs are collected every day at 06:00 UTC. To collect them now, see
 [Using the API](Using-the-API.md#find-new-jobs-right-now).
 
-## Step 5: Try it
+## Step 5: Open the dashboard
 
-Open **http://localhost:8081/docs** → click **Authorize** → paste your API key.
-Try `GET /api/v1/candidate` and `GET /api/v1/jobs`.
+Open **http://localhost:3001** and paste your API key (the value of `API_KEYS` in `.env`).
+
+| Page | What you do there |
+|---|---|
+| **Overview** | Totals, top matches, alerts, and the **Find & analyse jobs now** button |
+| **Job Explorer** | Search and filter (country, visa, score, salary), sort, and save jobs |
+| **Job details** | Score breakdown, matched and missing skills, visa evidence, salary and take-home |
+| **Applications** | Board from Saved to Offer, with drafts to review, edit and approve, and a tailored CV to download |
+| **Profile** | Your details, work authorization, countries, salary, match weights, skills and resumes |
+| **Agents** | What every agent did, run history, and turning job sources on or off |
+
+The API with interactive docs is at **http://localhost:8081/docs**.
 
 ## Optional: the local AI model
 

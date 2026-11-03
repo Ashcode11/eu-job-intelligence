@@ -74,7 +74,7 @@ or pass `force=True`.
 
 | Service | Responsibility | Scales by |
 |---|---|---|
-| `frontend` | Dashboard, job explorer, profile editor, application tracker, agent monitor. Talks only to the backend. | replicas (stateless) |
+| `frontend` | Next.js dashboard: overview, job explorer, job details, profile, application tracker, agent monitor. The browser calls `/backend/*` on the same origin, which Next.js forwards to the API. The API key stays in the browser; the frontend holds no secret. | replicas (stateless) |
 | `backend` | REST API, validation, auth, rate limiting, file uploads, audit log, enqueuing work. No LLM calls inline. | replicas (stateless) |
 | `agent-orchestrator` | Runs the LangGraph pipeline per discovery batch; owns workflow state, retries, decision log. | 1–2 replicas |
 | `job-discovery-worker` | Connectors (Greenhouse, Lever, Adzuna, EURES, RSS); robots.txt + rate limits; normalization, dedup, expiry. | replicas / queue `discovery` |

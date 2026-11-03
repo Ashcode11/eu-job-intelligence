@@ -27,6 +27,25 @@ uv run pytest tests/unit                 # fast tests, no services needed
 
 Tests use their own database (`eujobs_test`), so your data is safe.
 
+## Dashboard (frontend)
+
+The dashboard is a Next.js app in `frontend/`. Node isn't required locally: the Docker build
+installs packages, type-checks (`tsc --noEmit`) and builds it.
+
+```bash
+docker compose up -d --build frontend
+```
+
+For live editing with Node 20 installed:
+
+```bash
+cd frontend && npm ci && BACKEND_INTERNAL_URL=http://localhost:8081 npm run dev
+```
+
+Then open http://localhost:3001. The browser calls `/backend/*` on the same origin, which
+Next.js forwards to the API, so no CORS setup is needed. The API key lives only in the
+browser's local storage.
+
 ## Code style
 
 ```bash

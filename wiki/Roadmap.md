@@ -5,8 +5,8 @@
 | 1 | **Foundation**: database, API, profile, job list, application tracker, Docker setup | ✅ Done |
 | 2 | **Job discovery**: Greenhouse, Lever, Adzuna, Arbeitnow and RSS connectors, duplicate removal, expiry, daily schedule | ✅ Done (87 tests passing) |
 | 3 | **AI agents**: CV reading, matching, visa and salary analysis, application drafts, LangGraph workflow | ✅ Done (145 tests passing) |
-| 4 | **Dashboard**: Next.js web app with all pages | 🔨 Next |
-| 5 | **Kubernetes**: k3d cluster, Helm chart, scaling workers | ⏳ |
+| 4 | **Dashboard**: Next.js web app with all pages | ✅ Done |
+| 5 | **Kubernetes**: k3d cluster, Helm chart, scaling workers | 🔨 Next |
 | 6 | **Monitoring and quality**: Grafana dashboards, failure tests, end-to-end tests | ⏳ |
 
 ## Job sources

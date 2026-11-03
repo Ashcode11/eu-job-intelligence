@@ -5,6 +5,7 @@ All settings live in `.env` (copy it from `.env.example`). Never commit `.env`.
 | Setting | Default | What it does |
 |---|---|---|
 | `API_PORT` | `8081` | Port for the API on your computer |
+| `FRONTEND_PORT` | `3001` | Port for the dashboard on your computer |
 | `POSTGRES_PORT` | `5433` | Database port on your computer |
 | `REDIS_PORT` | `6380` | Redis port on your computer |
 | `POSTGRES_PASSWORD` | — | Database password (set it before the first start) |

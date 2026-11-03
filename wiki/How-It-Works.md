@@ -112,7 +112,8 @@ The reference numbers are rough and editable in `data/salary_reference.json`.
 
 | Container | Job |
 |---|---|
-| `backend` | the API you talk to |
+| `frontend` | the dashboard (Next.js) |
+| `backend` | the API the dashboard talks to |
 | `job-discovery-worker` | fetches jobs in the background |
 | `scheduler` | starts searches on time and expires old jobs |
 | `agent-orchestrator` | runs the pipeline (all agents in order) |

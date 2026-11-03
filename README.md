@@ -22,8 +22,8 @@ It is being built to:
 | 1. Foundation | Database, API, profile, job list, application tracker | ✅ Working and tested |
 | 2. Job discovery | Collect jobs from public job boards every day | ✅ Working and tested |
 | 3. AI agents | CV reading, matching, visa, salary and application helpers | ✅ Working and tested |
-| 4. Dashboard | Web interface | ⏳ Next |
-| 5. Kubernetes | Run on a local Kubernetes cluster | ⏳ Planned |
+| 4. Dashboard | Web interface | ✅ Working and tested |
+| 5. Kubernetes | Run on a local Kubernetes cluster | ⏳ Next |
 | 6. Monitoring | Grafana dashboards and more tests | ⏳ Planned |
 
 Today, every morning it:
@@ -70,20 +70,23 @@ docker compose up -d --build
 docker compose exec backend python -m scripts.seed
 ```
 
-**4. Open the API**
+**4. Open the dashboard**
 
-Go to **http://localhost:8081/docs**, click **Authorize** and paste one of your
-`API_KEYS` from `.env`. You can now try every endpoint in the browser.
+Go to **http://localhost:3001** and paste one of your `API_KEYS` from `.env`. The key is
+kept only in your browser.
+
+You can also use the API directly at **http://localhost:8081/docs**: click **Authorize** and
+paste the same key.
 
 > The sample jobs are made up, for testing only.
 
 **5. Find real jobs now** (otherwise it runs automatically every day at 06:00 UTC)
 
-In the API page, run `POST /api/v1/pipeline/run` with body `{}`. After about a minute,
-`GET /api/v1/jobs` lists jobs ranked by match score.
+Click **Find & analyse jobs now** on the dashboard. After about a minute the Job Explorer
+lists jobs ranked by match score.
 
-**6. Tell it about you.** Fill in your visa situation, minimum salary and CV (see
-[Your Profile](wiki/Your-Profile.md)). Until then, visa and salary fit stay "unknown".
+**6. Tell it about you.** Open **Profile** in the dashboard and fill in your visa situation,
+minimum salary and CV (see [Your Profile](wiki/Your-Profile.md)). Until then, visa and salary fit stay "unknown".
 
 ---
 

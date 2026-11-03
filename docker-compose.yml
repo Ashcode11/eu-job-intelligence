@@ -192,6 +192,28 @@ services:
       resources:
         limits: { cpus: "0.5", memory: 384m }
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infrastructure/docker/frontend.Dockerfile
+      args:
+        BACKEND_INTERNAL_URL: http://backend:8000
+    image: eujobs/frontend:${IMAGE_TAG:-dev}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256m }
+
   ollama:
     profiles: ["ollama"]
     image: ollama/ollama:0.4.7
