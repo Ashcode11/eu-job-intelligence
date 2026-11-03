@@ -18,7 +18,9 @@ and helps you prepare applications. **You always make the final decision.**
 | [Using the API](Using-the-API.md) | do common tasks with copy-paste commands |
 | [Configuration](Configuration.md) | change ports, passwords, AI model and limits |
 | [Developer Guide](Developer-Guide.md) | run tests, change the database, find your way in the code |
+| [Kubernetes](Kubernetes.md) | run it on a local Kubernetes cluster |
 | [Roadmap](Roadmap.md) | see what's done and what's next |
 | [FAQ](FAQ.md) | get quick answers |
 
+Running it day to day? See the [Runbook](../docs/runbook.md).
 Something broken? See [Troubleshooting](../docs/troubleshooting.md).

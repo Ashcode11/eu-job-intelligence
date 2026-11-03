@@ -23,8 +23,8 @@ It is being built to:
 | 2. Job discovery | Collect jobs from public job boards every day | ✅ Working and tested |
 | 3. AI agents | CV reading, matching, visa, salary and application helpers | ✅ Working and tested |
 | 4. Dashboard | Web interface | ✅ Working and tested |
-| 5. Kubernetes | Run on a local Kubernetes cluster | ⏳ Next |
-| 6. Monitoring | Grafana dashboards and more tests | ⏳ Planned |
+| 5. Kubernetes | Run on a local Kubernetes cluster (k3d + Helm) | ✅ Working and tested |
+| 6. Monitoring | Grafana dashboards, email/Telegram alerts, more tests | ⏳ Next |
 
 Today, every morning it:
 
@@ -100,7 +100,10 @@ The [wiki](wiki/Home.md) explains everything in simple steps:
 - [Using the API](wiki/Using-the-API.md): common tasks with copy-paste commands
 - [Configuration](wiki/Configuration.md): every setting in `.env`
 - [Developer Guide](wiki/Developer-Guide.md): tests, migrations, project layout
+- [Kubernetes](wiki/Kubernetes.md): run it on a local k3d cluster with Helm
 - [Roadmap](wiki/Roadmap.md) and [FAQ](wiki/FAQ.md)
+
+Operating it: **[Runbook](docs/runbook.md)** (daily checks, routine tasks, incident playbooks)
 
 Technical deep-dives: [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md)
 

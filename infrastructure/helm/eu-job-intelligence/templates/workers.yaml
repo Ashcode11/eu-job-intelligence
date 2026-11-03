@@ -1,0 +1,51 @@
+{{- range $name, $w := .Values.workers }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "eujobs.fullname" $ }}-{{ $name }}-worker
+  labels: {{- include "eujobs.labels" $ | nindent 4 }}
+spec:
+  {{- if not $w.autoscaling.enabled }}
+  replicas: {{ $w.replicas }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "eujobs.selector" (dict "root" $ "component" (printf "%s-worker" $name)) | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "eujobs.selector" (dict "root" $ "component" (printf "%s-worker" $name)) | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+    spec:
+      {{- include "eujobs.podSecurity" $ | nindent 6 }}
+      # Long tasks (an LLM call, a discovery run) get time to finish on scale-down.
+      terminationGracePeriodSeconds: 120
+      initContainers: {{- include "eujobs.waitForDb" $ | nindent 8 }}
+      containers:
+        - name: worker
+          image: {{ include "eujobs.pythonImage" $ }}
+          imagePullPolicy: {{ $.Values.image.python.pullPolicy }}
+          command: ["celery", "-A", "workers.celery_app", "worker", "-Q", {{ $w.queues | quote }},
+                    "-n", "{{ $name }}@$(POD_NAME)", "--concurrency", {{ $w.concurrency | quote }},
+                    "--loglevel", "INFO"]
+          {{- include "eujobs.pythonEnv" $ | nindent 10 }}
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "celery -A workers.celery_app inspect ping -d {{ $name }}@$POD_NAME --timeout 10 | grep -q pong"]
+            initialDelaySeconds: 45
+            periodSeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 3
+          resources: {{- toYaml $w.resources | nindent 12 }}
+          securityContext: { allowPrivilegeEscalation: false }
+          {{- if $w.mountUploads }}
+          volumeMounts: [{ name: uploads, mountPath: /data/uploads }]
+          {{- end }}
+      {{- if $w.mountUploads }}
+      volumes:
+        - name: uploads
+          persistentVolumeClaim: { claimName: {{ include "eujobs.fullname" $ }}-uploads }
+      {{- end }}
+{{- end }}

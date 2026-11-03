@@ -1,0 +1,35 @@
+# `helm test eujobs` — checks readiness and that the API key is enforced, from inside the cluster.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "eujobs.fullname" . }}-test-api
+  labels: {{- include "eujobs.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  {{- include "eujobs.podSecurity" . | nindent 2 }}
+  containers:
+    - name: test
+      image: {{ include "eujobs.pythonImage" . }}
+      imagePullPolicy: {{ .Values.image.python.pullPolicy }}
+      env:
+        - name: API_KEYS
+          valueFrom: { secretKeyRef: { name: {{ include "eujobs.secretName" . }}, key: API_KEYS } }
+      command:
+        - python
+        - -c
+        - |
+          import os, httpx
+          b = "http://backend:8000"
+          r = httpx.get(f"{b}/health/ready", timeout=10); assert r.status_code == 200, r.text
+          assert r.json()["checks"] == {"postgres": "ok", "redis": "ok"}, r.text
+          assert httpx.get(f"{b}/api/v1/agents/summary", timeout=10).status_code == 401
+          key = os.environ["API_KEYS"].split(",")[0]
+          r = httpx.get(f"{b}/api/v1/agents/summary", headers={"X-API-Key": key}, timeout=10)
+          assert r.status_code == 200, r.text
+          print("ok: ready, auth enforced, key accepted")
+      resources:
+        requests: { cpu: 10m, memory: 64Mi }
+        limits: { cpu: 250m, memory: 192Mi }

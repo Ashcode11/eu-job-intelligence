@@ -1,5 +1,8 @@
 # Troubleshooting
 
+For day-to-day operations and step-by-step incident playbooks, see the
+[Runbook](runbook.md).
+
 ## `bind: address already in use` on `docker compose up`
 
 Another stack is using the host port. Change `API_PORT`, `POSTGRES_PORT` or `REDIS_PORT`

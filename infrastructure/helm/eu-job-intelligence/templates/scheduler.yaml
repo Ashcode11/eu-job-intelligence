@@ -1,0 +1,27 @@
+# Celery beat. Exactly one replica, replaced (not rolled) on update, so schedules never
+# fire twice.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "eujobs.fullname" . }}-scheduler
+  labels: {{- include "eujobs.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy: { type: Recreate }
+  selector:
+    matchLabels: {{- include "eujobs.selector" (dict "root" . "component" "scheduler") | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "eujobs.selector" (dict "root" . "component" "scheduler") | nindent 8 }}
+    spec:
+      {{- include "eujobs.podSecurity" . | nindent 6 }}
+      initContainers: {{- include "eujobs.waitForDb" . | nindent 8 }}
+      containers:
+        - name: beat
+          image: {{ include "eujobs.pythonImage" . }}
+          imagePullPolicy: {{ .Values.image.python.pullPolicy }}
+          command: ["celery", "-A", "workers.celery_app", "beat", "--loglevel", "INFO",
+                    "--schedule", "/tmp/celerybeat-schedule"]
+          {{- include "eujobs.pythonEnv" . | nindent 10 }}
+          resources: {{- toYaml .Values.scheduler.resources | nindent 12 }}
+          securityContext: { allowPrivilegeEscalation: false }

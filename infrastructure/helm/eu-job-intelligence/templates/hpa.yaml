@@ -1,0 +1,29 @@
+{{- /* Horizontal Pod Autoscalers (CPU). Needs metrics-server (bundled with k3s/k3d). */ -}}
+{{- $targets := dict "backend" .Values.backend.autoscaling }}
+{{- range $name, $w := .Values.workers }}
+{{- $_ := set $targets (printf "%s-worker" $name) $w.autoscaling }}
+{{- end }}
+{{- range $name, $a := $targets }}
+{{- if $a.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "eujobs.fullname" $ }}-{{ $name }}
+  labels: {{- include "eujobs.labels" $ | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "eujobs.fullname" $ }}-{{ $name }}
+  minReplicas: {{ $a.minReplicas }}
+  maxReplicas: {{ $a.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: {{ $a.targetCPUUtilizationPercentage }} }
+  behavior:
+    scaleDown: { stabilizationWindowSeconds: 300 }
+{{- end }}
+{{- end }}

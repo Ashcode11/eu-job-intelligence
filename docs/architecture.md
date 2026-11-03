@@ -131,6 +131,12 @@ eu-job-intelligence/
 └── .env.example
 ```
 
+Kubernetes: one Helm chart (`infrastructure/helm/eu-job-intelligence`) deploys the same
+images. Postgres and Redis run as StatefulSets with PVCs, a migrate Job runs per revision,
+there is one Deployment per worker queue, beat runs as a single replica, autoscalers cover
+the backend and the discovery/matching workers, and an Ingress fronts it all. See
+`wiki/Kubernetes.md` and the runbook.
+
 Dependency direction: `backend`, `agents`, `workers` → `database` → `common`.
 `connectors` depend only on `common` and return plain Pydantic `RawJob` objects, so a
 connector can be tested without a database.

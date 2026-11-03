@@ -1,0 +1,138 @@
+# EU Job Intelligence Helm values.
+# One release per namespace: Services use fixed names (backend, postgres, redis, ollama,
+# frontend) because the frontend image forwards /backend/* to http://backend:8000.
+
+image:
+  python: { repository: eujobs/python, tag: dev, pullPolicy: IfNotPresent }
+  frontend: { repository: eujobs/frontend, tag: dev, pullPolicy: IfNotPresent }
+
+# Secrets. Leave empty to generate random values on first install. They are kept on
+# upgrade via `lookup`. Or point to a Secret you manage with `existingSecret`.
+secrets:
+  existingSecret: ""
+  postgresPassword: ""
+  redisPassword: ""
+  apiKeys: ""            # comma-separated
+  adzunaAppId: ""
+  adzunaAppKey: ""
+
+config:
+  environment: production
+  logLevel: INFO
+  rateLimitDefault: 120/minute
+  maxUploadMb: "10"
+  jobExpiryDays: "21"
+  # Ollama inside the cluster (ollama.enabled=true) or on the host. On k3d, the host is
+  # reachable as host.k3d.internal.
+  ollamaBaseUrl: http://host.k3d.internal:11434
+  llmChatModel: llama3.2:3b
+  llmEmbeddingModel: nomic-embed-text
+
+storageClass: ""   # "" = cluster default (local-path on k3d)
+
+postgres:
+  image: pgvector/pgvector:pg16
+  user: eujobs
+  database: eujobs
+  storage: 5Gi
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "1", memory: 768Mi }
+
+redis:
+  image: redis:7-alpine
+  storage: 1Gi
+  resources:
+    requests: { cpu: 25m, memory: 32Mi }
+    limits: { cpu: 250m, memory: 192Mi }
+
+uploads:
+  storage: 2Gi
+  # ReadWriteOnce works on a single node (k3d). Use an RWX class for multi-node clusters,
+  # because backend, matching and application workers share uploaded resumes.
+  accessMode: ReadWriteOnce
+
+backend:
+  replicas: 1
+  resources:
+    requests: { cpu: 100m, memory: 192Mi }
+    limits: { cpu: "1", memory: 512Mi }
+  autoscaling: { enabled: true, minReplicas: 1, maxReplicas: 3, targetCPUUtilizationPercentage: 70 }
+
+# Celery workers, one Deployment each, scaled independently.
+workers:
+  discovery:
+    queues: discovery,system
+    concurrency: 2
+    replicas: 1
+    mountUploads: false
+    resources:
+      requests: { cpu: 50m, memory: 160Mi }
+      limits: { cpu: "1", memory: 384Mi }
+    autoscaling: { enabled: true, minReplicas: 1, maxReplicas: 4, targetCPUUtilizationPercentage: 70 }
+  orchestrator:
+    queues: orchestrator
+    concurrency: 1
+    replicas: 1
+    mountUploads: true
+    resources:
+      requests: { cpu: 50m, memory: 192Mi }
+      limits: { cpu: "1", memory: 512Mi }
+    autoscaling: { enabled: false }
+  matching:
+    queues: matching
+    concurrency: 1
+    replicas: 1
+    mountUploads: true
+    resources:
+      requests: { cpu: 50m, memory: 160Mi }
+      limits: { cpu: "1", memory: 384Mi }
+    autoscaling: { enabled: true, minReplicas: 1, maxReplicas: 4, targetCPUUtilizationPercentage: 70 }
+  visa:
+    queues: visa
+    concurrency: 1
+    replicas: 1
+    mountUploads: false
+    resources:
+      requests: { cpu: 25m, memory: 128Mi }
+      limits: { cpu: 500m, memory: 320Mi }
+    autoscaling: { enabled: false }
+  application:
+    queues: application
+    concurrency: 1
+    replicas: 1
+    mountUploads: true
+    resources:
+      requests: { cpu: 25m, memory: 128Mi }
+      limits: { cpu: 500m, memory: 320Mi }
+    autoscaling: { enabled: false }
+
+scheduler:   # Celery beat: must stay at exactly one replica
+  resources:
+    requests: { cpu: 10m, memory: 96Mi }
+    limits: { cpu: 250m, memory: 192Mi }
+
+frontend:
+  replicas: 1
+  resources:
+    requests: { cpu: 25m, memory: 64Mi }
+    limits: { cpu: 500m, memory: 192Mi }
+
+ingress:
+  enabled: true
+  className: ""        # "" = cluster default (Traefik on k3d)
+  host: eujobs.localhost
+
+# Optional in-cluster Ollama. Local LLM inference needs RAM (about 3 GB for a 3B model).
+# Kubernetes does not provide GPUs automatically: install the NVIDIA device plugin and set
+# gpu.enabled=true (and suitable nodeSelector/tolerations) to request one.
+ollama:
+  enabled: false
+  image: ollama/ollama:0.4.7
+  storage: 10Gi
+  gpu: { enabled: false, count: 1 }
+  nodeSelector: {}
+  tolerations: []
+  resources:
+    requests: { cpu: 500m, memory: 3Gi }
+    limits: { cpu: "4", memory: 6Gi }

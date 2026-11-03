@@ -1,0 +1,17 @@
+EU Job Intelligence is deploying to namespace {{ .Release.Namespace }}.
+
+Watch it come up:
+  kubectl --context <ctx> -n {{ .Release.Namespace }} get pods -w
+
+Dashboard:  http://{{ .Values.ingress.host }}  (k3d via scripts/k8s-up.sh: http://{{ .Values.ingress.host }}:8088)
+API docs:   http://{{ .Values.ingress.host }}/docs
+
+Your API key (paste it into the dashboard):
+  kubectl --context <ctx> -n {{ .Release.Namespace }} get secret {{ include "eujobs.secretName" . }} -o jsonpath='{.data.API_KEYS}' | base64 -d; echo
+
+Load the sample profile and job sources once:
+  kubectl --context <ctx> -n {{ .Release.Namespace }} exec deploy/{{ include "eujobs.fullname" . }}-backend -- python -m scripts.seed --no-jobs
+{{- if not .Values.ollama.enabled }}
+
+LLM: using Ollama at {{ .Values.config.ollamaBaseUrl }} (not deployed in-cluster).
+{{- end }}

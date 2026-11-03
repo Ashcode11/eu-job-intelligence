@@ -7,5 +7,6 @@
 - [Using the API](Using-the-API.md)
 - [Configuration](Configuration.md)
 - [Developer Guide](Developer-Guide.md)
+- [Kubernetes](Kubernetes.md)
 - [Roadmap](Roadmap.md)
 - [FAQ](FAQ.md)

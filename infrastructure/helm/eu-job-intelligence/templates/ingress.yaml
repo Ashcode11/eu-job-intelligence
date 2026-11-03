@@ -1,0 +1,25 @@
+{{- if .Values.ingress.enabled }}
+# The dashboard at /, the API (docs, health, metrics) at its own paths. The dashboard
+# also reaches the API internally via /backend/*.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "eujobs.fullname" . }}
+  labels: {{- include "eujobs.labels" . | nindent 4 }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          {{- range list "/api" "/docs" "/openapi.json" "/health" }}
+          - path: {{ . }}
+            pathType: Prefix
+            backend: { service: { name: backend, port: { number: 8000 } } }
+          {{- end }}
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: frontend, port: { number: 3000 } } }
+{{- end }}

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "eujobs.fullname" . }}-uploads
+  labels: {{- include "eujobs.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep   # uploaded resumes survive `helm uninstall`
+spec:
+  accessModes: [{{ .Values.uploads.accessMode }}]
+  {{- with .Values.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources: { requests: { storage: {{ .Values.uploads.storage }} } }

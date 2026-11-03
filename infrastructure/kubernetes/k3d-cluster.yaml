@@ -1,0 +1,19 @@
+# Local single-node k3s cluster for EU Job Intelligence.
+#   k3d cluster create --config infrastructure/kubernetes/k3d-cluster.yaml
+# Traefik (ingress) and metrics-server (for the autoscalers) ship with k3s.
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: eujobs
+servers: 1
+agents: 0
+ports:
+  - port: 127.0.0.1:8088:80   # ingress -> http://eujobs.localhost:8088
+    nodeFilters: [loadbalancer]
+options:
+  k3d:
+    wait: true
+    timeout: 180s
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: false   # never hijack your current kubectl context

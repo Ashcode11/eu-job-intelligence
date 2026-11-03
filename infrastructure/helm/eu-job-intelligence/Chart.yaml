@@ -1,0 +1,6 @@
+apiVersion: v2
+name: eu-job-intelligence
+description: Self-hosted multi-agent European job search platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
