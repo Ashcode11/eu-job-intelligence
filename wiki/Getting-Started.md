@@ -44,8 +44,9 @@ Check that everything is healthy:
 docker compose ps
 ```
 
-You should see `postgres`, `redis`, `backend` and `job-discovery-worker` as **healthy**,
-and `scheduler` as **running**.
+You should see `postgres`, `redis`, `backend`, `job-discovery-worker`,
+`agent-orchestrator`, `matching-worker`, `visa-worker` and `application-worker` as
+**healthy**, and `scheduler` as **running**.
 `migrate` shows **exited (0)**. That is correct: it sets up the database once, then stops.
 
 ## Step 4: Load sample data
@@ -67,7 +68,8 @@ Try `GET /api/v1/candidate` and `GET /api/v1/jobs`.
 
 ## Optional: the local AI model
 
-The AI agents (step 3 of the [Roadmap](Roadmap.md)) need Ollama:
+Everything works without it. With Ollama, matching also compares meaning (embeddings),
+unclear visa wording is checked by the AI, and application drafts read better.
 
 ```bash
 brew install ollama

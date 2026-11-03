@@ -77,8 +77,11 @@ async def _dispatch_due() -> list[str]:
                     due.append(str(cfg.id))
     finally:
         await engine.dispose()
+    from workers.tasks.agents import run_pipeline
+
+    # Scheduled runs go through the full pipeline: discovery, then all analysis agents.
     for config_id in due:
-        run_search.apply_async(args=[config_id, "schedule"])
+        run_pipeline.apply_async(kwargs={"search_config_id": config_id, "trigger": "schedule"})
     if due:
         log.info("discovery_dispatched", count=len(due))
     return due

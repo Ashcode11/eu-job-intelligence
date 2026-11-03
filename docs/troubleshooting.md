@@ -53,6 +53,18 @@ Then fetch `/api/v1/agents/tasks/<task_id>`. The state should be `SUCCESS`.
 them with `docker compose up -d postgres redis` and make sure `DATABASE_URL`/`REDIS_URL`
 in `.env` point at the host ports (`localhost:5433`, `localhost:6380`).
 
+## Jobs have scores but `semantic_similarity` is empty
+
+Ollama isn't reachable or the models aren't pulled. The pipeline then uses rule-based
+scoring only (see the `embedding` step in `GET /api/v1/agents/executions`). Start
+Ollama, pull `nomic-embed-text` and your chat model, then re-score with
+`POST /api/v1/pipeline/run {"analyse_only": true, "force": true}`.
+
+## A resume shows `parse_error`
+
+The PDF is probably scanned (an image). Upload a DOCX or a text-based PDF, or re-run
+parsing with `POST /api/v1/candidate/resumes/<id>/parse`.
+
 ## Ollama is slow or runs out of memory
 
 - On macOS, Docker containers cannot use the Apple GPU. Run Ollama natively and set

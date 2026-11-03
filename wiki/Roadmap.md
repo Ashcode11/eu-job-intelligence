@@ -4,8 +4,8 @@
 |---|---|---|
 | 1 | **Foundation**: database, API, profile, job list, application tracker, Docker setup | ✅ Done |
 | 2 | **Job discovery**: Greenhouse, Lever, Adzuna, Arbeitnow and RSS connectors, duplicate removal, expiry, daily schedule | ✅ Done (87 tests passing) |
-| 3 | **AI agents**: CV reading, matching, visa and salary analysis, application drafts, LangGraph workflow | 🔨 Next |
-| 4 | **Dashboard**: Next.js web app with all pages | ⏳ |
+| 3 | **AI agents**: CV reading, matching, visa and salary analysis, application drafts, LangGraph workflow | ✅ Done (145 tests passing) |
+| 4 | **Dashboard**: Next.js web app with all pages | 🔨 Next |
 | 5 | **Kubernetes**: k3d cluster, Helm chart, scaling workers | ⏳ |
 | 6 | **Monitoring and quality**: Grafana dashboards, failure tests, end-to-end tests | ⏳ |
 
@@ -20,6 +20,7 @@
 | RSS | any job feed | ✅ add your own |
 | EURES | EU job portal | no open public API; only added if an official one is available |
 
-## Notifications (planned)
+## Notifications
 
-Daily email digest, Telegram alerts, high-match alerts, visa sponsorship alerts.
+- ✅ Dashboard alerts: high matches, visa sponsorship offers, new jobs (each sent once)
+- ⏳ Email digest and Telegram alerts (Phase 6)

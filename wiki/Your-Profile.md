@@ -51,6 +51,24 @@ curl -H "X-API-Key: $KEY" -F file=@my-cv.pdf -F version_label=main \
 - Maximum 10 MB (change with `MAX_UPLOAD_MB`).
 - You can keep several versions. One is marked **primary**.
 
+After upload, the CV agent reads it in the background (a few seconds):
+
+```bash
+curl -H "X-API-Key: $KEY" http://localhost:8081/api/v1/candidate/resumes/<resume-id>/analysis
+```
+
+You get skills found, certifications, years of experience, **suggested skills** missing
+from your inventory, and skills that jobs ask for that you don't list. Suggestions are
+**not** added automatically. Pick the ones you want:
+
+```bash
+curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/candidate/resumes/<resume-id>/apply-skills \
+  -d '{"skills":["ArgoCD","Pulumi"]}'
+```
+
+Scanned (image-only) PDFs can't be read. Upload a DOCX or a text-based PDF.
+
 ## Countries and roles
 
 The sample profile targets DE, NL, IE, SE, DK, FI, BE and LU, plus 10 cloud architect roles.

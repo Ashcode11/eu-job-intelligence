@@ -306,6 +306,7 @@ class DiscoveryService:
             if job.content_hash != chash:
                 for k, v in fields.items():
                     setattr(job, k, v)
+                job.embedding = None  # re-embedded by the pipeline
                 stats.updated += 1
                 _decide(decisions, job.id, raw, "updated", "content changed")
             else:

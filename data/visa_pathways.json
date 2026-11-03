@@ -1,0 +1,55 @@
+{
+  "_comment": "Work-permit routes for skilled non-EU professionals, by country. Names and official links only. Salary thresholds change every year, so always check the official page. This is general information, not legal advice.",
+  "DE": [
+    {"name": "EU Blue Card (Germany)", "reference_url": "https://www.make-it-in-germany.com/en/visa-residence/types/eu-blue-card",
+     "notes": "Recognised degree plus a job offer above the annual salary threshold (lower threshold for shortage occupations, which include IT)."},
+    {"name": "Skilled worker residence permit (§18b)", "reference_url": "https://www.make-it-in-germany.com/en/visa-residence/types/skilled-workers",
+     "notes": "For qualified professionals with a recognised qualification."}
+  ],
+  "NL": [
+    {"name": "Highly Skilled Migrant (kennismigrant)", "reference_url": "https://ind.nl/en/residence-permits/work/highly-skilled-migrant",
+     "notes": "Employer must be a recognised sponsor with the IND. Age-dependent salary threshold."},
+    {"name": "EU Blue Card (Netherlands)", "reference_url": "https://ind.nl/en/residence-permits/work/eu-blue-card",
+     "notes": "Degree requirement and salary threshold."}
+  ],
+  "IE": [
+    {"name": "Critical Skills Employment Permit", "reference_url": "https://enterprise.gov.ie/en/what-we-do/workplace-and-skills/employment-permits/permit-types/critical-skills-employment-permit/",
+     "notes": "For occupations on the Critical Skills list (many ICT roles) above the salary threshold."},
+    {"name": "General Employment Permit", "reference_url": "https://enterprise.gov.ie/en/what-we-do/workplace-and-skills/employment-permits/permit-types/general-employment-permit/",
+     "notes": "Usually requires a labour market needs test."}
+  ],
+  "SE": [
+    {"name": "Work permit (Sweden)", "reference_url": "https://www.migrationsverket.se/English/Private-individuals/Working-in-Sweden/Employed.html",
+     "notes": "Job offer meeting Swedish collective-agreement terms and the minimum salary requirement."},
+    {"name": "EU Blue Card (Sweden)", "reference_url": "https://www.migrationsverket.se/English/Private-individuals/Working-in-Sweden/Employed/Special-rules-for-certain-occupations-and-countries/EU-Blue-Card.html",
+     "notes": "Higher qualifications plus a salary threshold."}
+  ],
+  "DK": [
+    {"name": "Pay Limit Scheme", "reference_url": "https://www.nyidanmark.dk/en-GB/You-want-to-apply/Work/Pay-limit-scheme",
+     "notes": "Job offer above the annual pay limit."},
+    {"name": "Positive List for People with a Higher Education", "reference_url": "https://www.nyidanmark.dk/en-GB/You-want-to-apply/Work/Positive-list-higher-education",
+     "notes": "For occupations with documented shortages."},
+    {"name": "Fast-track scheme", "reference_url": "https://www.nyidanmark.dk/en-GB/You-want-to-apply/Work/Fast-track-scheme",
+     "notes": "Only via employers certified by SIRI."}
+  ],
+  "FI": [
+    {"name": "Residence permit for a specialist", "reference_url": "https://migri.fi/en/specialist",
+     "notes": "Expert work with a higher-education degree and a salary threshold. A fast track exists."},
+    {"name": "EU Blue Card (Finland)", "reference_url": "https://migri.fi/en/eu-blue-card",
+     "notes": "Higher qualifications plus a salary threshold."}
+  ],
+  "BE": [
+    {"name": "Single permit, highly qualified worker", "reference_url": "https://www.belgium.be/en/work/coming_to_work_in_belgium",
+     "notes": "Rules differ by region (Brussels, Flanders, Wallonia)."},
+    {"name": "EU Blue Card (Belgium)", "reference_url": "https://www.belgium.be/en/work/coming_to_work_in_belgium",
+     "notes": "Degree plus a salary threshold set by each region."}
+  ],
+  "LU": [
+    {"name": "EU Blue Card (Luxembourg)", "reference_url": "https://guichet.public.lu/en/citoyens/immigration/plus-3-mois/ressortissant-tiers/travailleur-hautement-qualifie.html",
+     "notes": "Highly qualified worker route with a salary threshold."}
+  ],
+  "AT": [
+    {"name": "Red-White-Red Card / EU Blue Card (Austria)", "reference_url": "https://www.migration.gv.at/en/types-of-immigration/permanent-immigration/",
+     "notes": "Points-based routes for very highly qualified and key workers."}
+  ]
+}

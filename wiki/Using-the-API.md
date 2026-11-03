@@ -37,7 +37,23 @@ Sorting: `sort=match_score` (default), `posted_at`, `salary` or `discovered_at`.
 curl -H "X-API-Key: $KEY" "http://localhost:8081/api/v1/jobs/<job-id>"
 ```
 
-## Find new jobs right now
+## Run everything now (find, score, check visa and salary)
+
+```bash
+curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/pipeline/run -d '{}'
+```
+
+To re-score stored jobs without fetching, for example after editing your profile, send
+`{"analyse_only": true}`. To redo one job from scratch:
+
+```bash
+curl -X POST -H "X-API-Key: $KEY" http://localhost:8081/api/v1/jobs/<job-id>/reprocess
+```
+
+Unchanged jobs are skipped automatically, so running it often is cheap.
+
+## Find new jobs only
 
 Discovery runs every day by itself. To run it now:
 
@@ -92,6 +108,31 @@ curl -X PATCH -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
 
 Statuses: `saved` → `shortlisted` → `prepared` → `applied` → `interview_scheduled` →
 `offer_received` (or `rejected` / `withdrawn`). Every change is kept in `status_history`.
+
+## Prepare an application (drafts only)
+
+```bash
+# ask the agent for a tailored CV, cover letter, recruiter message and interview prep
+curl -X POST -H "X-API-Key: $KEY" http://localhost:8081/api/v1/applications/<application-id>/prepare
+# read the drafts
+curl -H "X-API-Key: $KEY" http://localhost:8081/api/v1/applications
+# edit a draft (this clears any earlier approval)
+curl -X PATCH -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
+  http://localhost:8081/api/v1/applications/<application-id>/drafts -d '{"cover_letter_draft":"..."}'
+# approve the drafts (a record for you; nothing is sent)
+curl -X POST -H "X-API-Key: $KEY" http://localhost:8081/api/v1/applications/<application-id>/approve-drafts
+# download the tailored CV (Word file)
+curl -H "X-API-Key: $KEY" -o cv.docx http://localhost:8081/api/v1/applications/<application-id>/tailored-cv
+```
+
+You send applications and messages yourself. The system never does.
+
+## Notifications
+
+```bash
+curl -H "X-API-Key: $KEY" "http://localhost:8081/api/v1/notifications?unread_only=true"
+curl -X POST -H "X-API-Key: $KEY" http://localhost:8081/api/v1/notifications/read
+```
 
 ## Dashboard numbers
 

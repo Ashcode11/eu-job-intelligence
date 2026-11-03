@@ -117,3 +117,26 @@ async def client(engine, test_settings: Settings) -> AsyncIterator[AsyncClient]:
             transport=transport, base_url="http://test", headers={"X-API-Key": TEST_API_KEY}
         ) as c:
             yield c
+
+
+class _FakeAsyncResult:
+    def __init__(self, task_name: str) -> None:
+        import uuid
+
+        self.id = str(uuid.uuid4())
+        self.task_name = task_name
+
+
+@pytest.fixture(autouse=True)
+def queued_tasks(monkeypatch):
+    """Never send real Celery tasks from tests; record them instead."""
+    from celery.app.task import Task
+
+    calls: list[dict] = []
+
+    def fake_apply_async(self, args=None, kwargs=None, **options):
+        calls.append({"task": self.name, "args": list(args or []), "kwargs": dict(kwargs or {})})
+        return _FakeAsyncResult(self.name)
+
+    monkeypatch.setattr(Task, "apply_async", fake_apply_async)
+    return calls

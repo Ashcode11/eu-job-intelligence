@@ -120,6 +120,78 @@ services:
       resources:
         limits: { cpus: "0.25", memory: 256m }
 
+  # Runs the LangGraph pipeline: discovery -> matching -> visa -> salary -> ranking -> notify.
+  agent-orchestrator:
+    <<: *python-service
+    command: ["celery", "-A", "workers.celery_app", "worker", "-Q", "orchestrator",
+              "-n", "orchestrator@%h", "--concurrency", "1", "--loglevel", "INFO"]
+    depends_on: &worker-deps
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    volumes:
+      - uploads:/data/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A workers.celery_app inspect ping -d orchestrator@$$HOSTNAME --timeout 5 | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 768m }
+
+  # CV parsing (CV Intelligence agent). Scale with: docker compose up -d --scale matching-worker=2
+  matching-worker:
+    <<: *python-service
+    command: ["celery", "-A", "workers.celery_app", "worker", "-Q", "matching",
+              "-n", "matching@%h", "--concurrency", "1", "--loglevel", "INFO"]
+    depends_on: *worker-deps
+    volumes:
+      - uploads:/data/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A workers.celery_app inspect ping -d matching@$$HOSTNAME --timeout 5 | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 512m }
+
+  # Visa re-assessment (e.g. after a company's documented-sponsor evidence changes).
+  visa-worker:
+    <<: *python-service
+    command: ["celery", "-A", "workers.celery_app", "worker", "-Q", "visa",
+              "-n", "visa@%h", "--concurrency", "1", "--loglevel", "INFO"]
+    depends_on: *worker-deps
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A workers.celery_app inspect ping -d visa@$$HOSTNAME --timeout 5 | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 384m }
+
+  # Application drafts (tailored CV, cover letter, outreach, interview prep). Never sends.
+  application-worker:
+    <<: *python-service
+    command: ["celery", "-A", "workers.celery_app", "worker", "-Q", "application",
+              "-n", "application@%h", "--concurrency", "1", "--loglevel", "INFO"]
+    depends_on: *worker-deps
+    volumes:
+      - uploads:/data/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A workers.celery_app inspect ping -d application@$$HOSTNAME --timeout 5 | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 384m }
+
   ollama:
     profiles: ["ollama"]
     image: ollama/ollama:0.4.7

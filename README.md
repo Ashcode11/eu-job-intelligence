@@ -21,15 +21,24 @@ It is being built to:
 |---|---|---|
 | 1. Foundation | Database, API, profile, job list, application tracker | ✅ Working and tested |
 | 2. Job discovery | Collect jobs from public job boards every day | ✅ Working and tested |
-| 3. AI agents | Matching, visa, salary and application helpers | ⏳ Next |
-| 4. Dashboard | Web interface | ⏳ Planned |
+| 3. AI agents | CV reading, matching, visa, salary and application helpers | ✅ Working and tested |
+| 4. Dashboard | Web interface | ⏳ Next |
 | 5. Kubernetes | Run on a local Kubernetes cluster | ⏳ Planned |
 | 6. Monitoring | Grafana dashboards and more tests | ⏳ Planned |
 
-Today it collects real cloud architect jobs from 15 public job sources every morning,
-removes duplicates, closes jobs that disappear, and lets you browse them and track your
-applications through the API. In its first live run it checked about 3,000 postings and
-kept 18 relevant ones in the target countries.
+Today, every morning it:
+
+- collects cloud architect jobs from 15 public job sources and removes duplicates
+- scores each job from 0 to 100 against your profile, with reasons for and against
+- reads the post for visa sponsorship and saves the exact sentence as evidence
+- converts salaries to yearly EUR and estimates take-home pay and savings
+- alerts you about high matches and sponsorship offers
+
+On request it reads your CV, suggests skills (added only when you approve) and drafts a
+tailored CV, cover letter, recruiter message and interview prep. Drafts are never sent.
+
+Everything works **without** an AI model. With [Ollama](wiki/Getting-Started.md#optional-the-local-ai-model)
+running, it also uses meaning-based matching and writes better drafts.
 
 ---
 
@@ -70,8 +79,11 @@ Go to **http://localhost:8081/docs**, click **Authorize** and paste one of your
 
 **5. Find real jobs now** (otherwise it runs automatically every day at 06:00 UTC)
 
-In the API page, run `POST /api/v1/discovery/run` with body `{}`. Then look at
-`GET /api/v1/jobs` after about a minute.
+In the API page, run `POST /api/v1/pipeline/run` with body `{}`. After about a minute,
+`GET /api/v1/jobs` lists jobs ranked by match score.
+
+**6. Tell it about you.** Fill in your visa situation, minimum salary and CV (see
+[Your Profile](wiki/Your-Profile.md)). Until then, visa and salary fit stay "unknown".
 
 ---
 

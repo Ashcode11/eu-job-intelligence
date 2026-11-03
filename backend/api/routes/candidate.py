@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile, status
+from pydantic import BaseModel, Field
 from sqlalchemy import select, update
 
 from backend.deps import CandidateDep, SessionDep, SettingsDep, load_candidate
@@ -25,6 +26,7 @@ from backend.schemas.candidate import (
 from backend.security import ActorDep, read_validated_resume
 from backend.services.audit import record_audit
 from backend.services.candidate import missing_profile_fields
+from backend.services.tasks import enqueue
 from common.enums import SkillSource
 from database.models import (
     Candidate,
@@ -332,8 +334,92 @@ async def upload_resume(
     except Exception:
         target.unlink(missing_ok=True)
         raise
-    # Parsing and embedding are queued here once the CV agent exists (Phase 3).
+    from workers.tasks.agents import parse_resume
+
+    try:
+        await enqueue(parse_resume, str(resume.id))
+    except HTTPException:
+        pass  # the upload succeeded; parsing can be re-run with POST .../parse
     return resume
+
+
+@router.post("/resumes/{resume_id}/parse", status_code=status.HTTP_202_ACCEPTED)
+async def parse_resume_again(resume_id: uuid.UUID, candidate: CandidateDep) -> dict:
+    from workers.tasks.agents import parse_resume
+
+    if not any(r.id == resume_id for r in candidate.resumes):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Resume not found")
+    return {"task_id": await enqueue(parse_resume, str(resume_id), "manual")}
+
+
+@router.get("/resumes/{resume_id}/analysis")
+async def resume_analysis(resume_id: uuid.UUID, candidate: CandidateDep) -> dict:
+    """What the CV agent found: skills, certifications, suggestions, strengths and gaps."""
+    resume = next((r for r in candidate.resumes if r.id == resume_id), None)
+    if resume is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Resume not found")
+    if resume.parsed_at is None:
+        return {"status": "pending"}
+    if resume.parse_error:
+        return {"status": "failed", "error": resume.parse_error}
+    return {
+        "status": "parsed",
+        "parsed_at": resume.parsed_at,
+        "has_embedding": resume.embedding is not None,
+        **(resume.parsed_data or {}),
+    }
+
+
+class ApplySkills(BaseModel):
+    skills: list[str] = Field(min_length=1, max_length=100)
+
+
+@router.post("/resumes/{resume_id}/apply-skills", response_model=list[SkillRead])
+async def apply_suggested_skills(
+    resume_id: uuid.UUID,
+    body: ApplySkills,
+    candidate: CandidateDep,
+    session: SessionDep,
+    actor: ActorDep,
+    request: Request,
+) -> list[CandidateSkill]:
+    """Add skills the CV agent suggested. Only the ones you list are added (your approval)."""
+    resume = next((r for r in candidate.resumes if r.id == resume_id), None)
+    if resume is None or not resume.parsed_data:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No parsed resume with that id")
+    suggested = {s["name"].lower(): s for s in resume.parsed_data.get("suggested_skills", [])}
+    unknown = [n for n in body.skills if n.lower() not in suggested]
+    if unknown:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT, f"Not among this resume's suggestions: {unknown}"
+        )
+    have = {s.name.lower() for s in candidate.skills}
+    added = []
+    for name in body.skills:
+        sug = suggested[name.lower()]
+        if sug["name"].lower() in have:
+            continue
+        skill = CandidateSkill(
+            candidate_id=candidate.id,
+            name=sug["name"],
+            category=sug.get("category"),
+            source=SkillSource.CV,
+        )
+        session.add(skill)
+        added.append(skill)
+        have.add(sug["name"].lower())
+    await session.flush()
+    record_audit(
+        session,
+        request=request,
+        actor=actor,
+        action="skill.apply_from_cv",
+        entity_type="candidate_resume",
+        entity_id=resume_id,
+        details={"added": [s.name for s in added]},
+    )
+    await session.commit()
+    return added
 
 
 @router.post("/resumes/{resume_id}/primary", response_model=ResumeRead)

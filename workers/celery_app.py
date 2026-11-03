@@ -13,7 +13,7 @@ celery_app = Celery(
     "eujobs",
     broker=settings.broker_url,
     backend=settings.result_backend,
-    include=["workers.tasks.system", "workers.tasks.discovery"],
+    include=["workers.tasks.system", "workers.tasks.discovery", "workers.tasks.agents"],
 )
 
 celery_app.conf.update(

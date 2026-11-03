@@ -16,6 +16,13 @@ quote and link. Hiring international staff is never treated as proof.
 **Why are my citizenship and visa fields empty?**
 On purpose. The system never guesses them. Fill them in under [Your Profile](Your-Profile.md).
 
+**Does it need the AI model to work?**
+No. Scoring, visa and salary analysis are rule-based and run without Ollama. With Ollama
+you also get meaning-based matching and better-written drafts.
+
+**Will it add skills from my CV by itself?**
+No. It suggests them, and you choose which to add.
+
 **Is the "interview likelihood" accurate?**
 It's a rough estimate based on how well your profile overlaps the job, not a prediction
 from real hiring data. It's labelled that way everywhere.

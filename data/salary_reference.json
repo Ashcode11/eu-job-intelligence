@@ -1,0 +1,30 @@
+{
+  "_comment": "ROUGH APPROXIMATIONS for planning only. They are not survey data, tax advice or official figures. Edit them with numbers you trust; every estimate the app shows lists the values used.",
+  "as_of": "2026-11",
+  "fx_to_eur": {
+    "_note": "Approximate exchange rates (1 unit = x EUR). Update periodically.",
+    "EUR": 1.0, "SEK": 0.087, "DKK": 0.134, "NOK": 0.085, "GBP": 1.17, "CHF": 1.06,
+    "PLN": 0.23, "CZK": 0.04, "HUF": 0.0025, "USD": 0.92
+  },
+  "period_multiplier": {"year": 1, "month": 12, "week": 46, "day": 220, "hour": 1720},
+  "benchmarks_senior_cloud_architect_eur": {
+    "_note": "Gross annual EUR, senior cloud/solutions architect, [p25, median, p75]. Author's rough estimate from public salary-site ranges; not survey data.",
+    "DE": [80000, 92000, 108000], "NL": [80000, 92000, 110000], "IE": [85000, 100000, 120000],
+    "SE": [65000, 76000, 90000], "DK": [85000, 98000, 115000], "FI": [65000, 75000, 88000],
+    "BE": [75000, 87000, 100000], "LU": [90000, 105000, 125000], "AT": [70000, 82000, 95000],
+    "CH": [130000, 150000, 175000], "FR": [65000, 78000, 92000], "ES": [50000, 60000, 72000]
+  },
+  "seniority_factor": {"junior": 0.6, "senior": 1.0, "staff": 1.1, "lead": 1.1, "principal": 1.2, "manager": 1.05, "head": 1.25, "director": 1.35},
+  "effective_tax_and_social_rate": {
+    "_note": "Single person, no children, around EUR 90k gross. A flat rate approximates progressive income tax plus employee social contributions. Expat schemes (e.g. NL 30% ruling) are NOT applied.",
+    "DE": 0.40, "NL": 0.40, "IE": 0.38, "SE": 0.37, "DK": 0.43, "FI": 0.38, "BE": 0.47,
+    "LU": 0.33, "AT": 0.40, "CH": 0.25, "FR": 0.37, "ES": 0.36
+  },
+  "living_cost_annual_eur": {
+    "_note": "Single person: 1-bedroom rent in or near the city centre plus typical monthly costs (food, transport, utilities, insurance), times 12.",
+    "DE": 27000, "DE:Munich": 33000, "DE:Munchen": 33000, "DE:Berlin": 28000, "DE:Hamburg": 29000, "DE:Frankfurt": 30000,
+    "NL": 32000, "NL:Amsterdam": 36000, "IE": 36000, "IE:Dublin": 40000, "SE": 26000, "SE:Stockholm": 28000,
+    "DK": 30000, "DK:Copenhagen": 32000, "FI": 24000, "FI:Helsinki": 25000, "BE": 25000, "BE:Brussels": 26000,
+    "LU": 36000, "AT": 26000, "AT:Vienna": 27000, "CH": 50000, "FR": 28000, "FR:Paris": 34000, "ES": 22000
+  }
+}

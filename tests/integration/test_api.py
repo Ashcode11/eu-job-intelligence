@@ -271,3 +271,99 @@ async def test_duplicates_hidden_from_job_list(client, session):
     assert (await client.get("/api/v1/jobs", params={"include_duplicates": True})).json()[
         "total"
     ] == 8
+
+
+async def test_pipeline_and_reprocess_endpoints_enqueue(client, session, queued_tasks):
+    await _seed(session)
+    r = await client.post("/api/v1/pipeline/run", json={})
+    assert r.status_code == 202, r.text
+    assert queued_tasks[-1]["task"] == "orchestrator.run_pipeline"
+    assert queued_tasks[-1]["kwargs"]["search_config_id"]
+    r = await client.post("/api/v1/pipeline/run", json={"analyse_only": True, "force": True})
+    assert queued_tasks[-1]["kwargs"] == {"force": True, "trigger": "api"}
+    job_id = (await client.get("/api/v1/jobs")).json()["items"][0]["id"]
+    r = await client.post(f"/api/v1/jobs/{job_id}/reprocess")
+    assert r.status_code == 202
+    assert queued_tasks[-1]["kwargs"]["job_ids"] == [job_id]
+
+
+async def test_resume_upload_enqueues_parse_and_apply_skills(client, session, queued_tasks):
+    from sqlalchemy import select
+
+    from database.models import CandidateResume
+
+    await _seed(session, jobs=False)
+    r = await client.post(
+        "/api/v1/candidate/resumes",
+        files={"file": ("cv.pdf", io.BytesIO(b"%PDF-1.4\nx\n"), "application/pdf")},
+    )
+    rid = r.json()["id"]
+    assert queued_tasks[-1] == {"task": "matching.parse_resume", "args": [rid], "kwargs": {}}
+    assert (await client.get(f"/api/v1/candidate/resumes/{rid}/analysis")).json() == {
+        "status": "pending"
+    }
+
+    resume = await session.scalar(select(CandidateResume))
+    from datetime import UTC, datetime
+
+    resume.parsed_at = datetime.now(UTC)
+    resume.parsed_data = {
+        "suggested_skills": [
+            {"name": "ArgoCD", "category": "ci_cd"},
+            {"name": "Pulumi", "category": "iac"},
+        ]
+    }
+    await session.commit()
+    r = await client.post(
+        f"/api/v1/candidate/resumes/{rid}/apply-skills", json={"skills": ["argocd"]}
+    )
+    assert r.status_code == 200, r.text
+    assert [s["name"] for s in r.json()] == ["ArgoCD"] and r.json()[0]["source"] == "cv"
+    bad = await client.post(
+        f"/api/v1/candidate/resumes/{rid}/apply-skills", json={"skills": ["Kotlin"]}
+    )
+    assert bad.status_code == 422
+
+
+async def test_application_drafts_approval_flow(client, session, queued_tasks):
+    await _seed(session)
+    job_id = (await client.get("/api/v1/jobs")).json()["items"][0]["id"]
+    app_id = (await client.post("/api/v1/applications", json={"job_id": job_id})).json()["id"]
+    assert (await client.post(f"/api/v1/applications/{app_id}/approve-drafts")).status_code == 409
+    r = await client.post(f"/api/v1/applications/{app_id}/prepare")
+    assert r.status_code == 202 and queued_tasks[-1]["task"] == "application.prepare"
+    r = await client.patch(
+        f"/api/v1/applications/{app_id}/drafts", json={"cover_letter_draft": "My letter"}
+    )
+    assert r.json()["cover_letter_draft"] == "My letter"
+    r = await client.post(f"/api/v1/applications/{app_id}/approve-drafts")
+    assert r.json()["drafts_approved_at"] is not None
+    r = await client.patch(
+        f"/api/v1/applications/{app_id}/drafts", json={"cover_letter_draft": "Edited again"}
+    )
+    assert r.json()["drafts_approved_at"] is None  # edits require re-approval
+    assert (await client.get(f"/api/v1/applications/{app_id}/tailored-cv")).status_code == 404
+
+
+async def test_notifications_api(client, session):
+    from database.models import Candidate, Notification
+
+    await _seed(session, jobs=False)
+    from sqlalchemy import select
+
+    cand = await session.scalar(select(Candidate))
+    session.add(
+        Notification(
+            candidate_id=cand.id,
+            channel="dashboard",
+            kind="high_match",
+            title="t",
+            body="b",
+            dedup_key="k1",
+        )
+    )
+    await session.commit()
+    items = (await client.get("/api/v1/notifications", params={"unread_only": True})).json()
+    assert len(items) == 1 and items[0]["status"] == "pending"
+    assert (await client.post("/api/v1/notifications/read")).status_code == 204
+    assert (await client.get("/api/v1/notifications", params={"unread_only": True})).json() == []

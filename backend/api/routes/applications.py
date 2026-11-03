@@ -1,10 +1,14 @@
 """Application tracker. Tracks status only; nothing is ever submitted on the user's behalf."""
 
+import asyncio
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, StringConstraints
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
@@ -12,8 +16,9 @@ from backend.deps import CandidateDep, SessionDep
 from backend.schemas.jobs import ApplicationCreate, ApplicationRead, ApplicationUpdate
 from backend.security import ActorDep
 from backend.services.audit import record_audit
+from backend.services.tasks import enqueue
 from common.enums import ApplicationStatus
-from database.models import Application, Job
+from database.models import Application, CandidateResume, Job
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -156,3 +161,101 @@ async def delete_application(
         entity_id=application_id,
     )
     await session.commit()
+
+
+@router.post("/{application_id}/prepare", status_code=status.HTTP_202_ACCEPTED)
+async def prepare_application(
+    application_id: uuid.UUID,
+    candidate: CandidateDep,
+    session: SessionDep,
+    actor: ActorDep,
+    request: Request,
+) -> dict:
+    """Ask the Application agent for drafts. Nothing is sent or submitted."""
+    from workers.tasks.agents import prepare_application as task
+
+    await _load(session, application_id, candidate.id)
+    tid = await enqueue(task, str(application_id))
+    record_audit(
+        session,
+        request=request,
+        actor=actor,
+        action="application.prepare",
+        entity_type="application",
+        entity_id=application_id,
+    )
+    await session.commit()
+    return {"task_id": tid}
+
+
+class DraftsUpdate(BaseModel):
+    cover_letter_draft: Annotated[str, StringConstraints(max_length=20000)] | None = None
+    outreach_message_draft: Annotated[str, StringConstraints(max_length=2000)] | None = None
+
+
+@router.patch("/{application_id}/drafts", response_model=ApplicationRead)
+async def edit_drafts(
+    application_id: uuid.UUID,
+    body: DraftsUpdate,
+    candidate: CandidateDep,
+    session: SessionDep,
+    actor: ActorDep,
+    request: Request,
+) -> ApplicationRead:
+    """Edit drafts. Any edit clears a previous approval."""
+    app = await _load(session, application_id, candidate.id)
+    for k, v in body.model_dump(exclude_none=True).items():
+        setattr(app, k, v)
+    app.drafts_approved_at = None
+    record_audit(
+        session,
+        request=request,
+        actor=actor,
+        action="application.edit_drafts",
+        entity_type="application",
+        entity_id=application_id,
+    )
+    await session.commit()
+    return _to_read(await _load(session, application_id, candidate.id))
+
+
+@router.post("/{application_id}/approve-drafts", response_model=ApplicationRead)
+async def approve_drafts(
+    application_id: uuid.UUID,
+    candidate: CandidateDep,
+    session: SessionDep,
+    actor: ActorDep,
+    request: Request,
+) -> ApplicationRead:
+    """Record your approval of the drafts. You still send or submit them yourself."""
+    app = await _load(session, application_id, candidate.id)
+    if not (app.cover_letter_draft or app.outreach_message_draft):
+        raise HTTPException(status.HTTP_409_CONFLICT, "No drafts to approve yet")
+    app.drafts_approved_at = datetime.now(UTC)
+    record_audit(
+        session,
+        request=request,
+        actor=actor,
+        action="application.approve_drafts",
+        entity_type="application",
+        entity_id=application_id,
+    )
+    await session.commit()
+    return _to_read(await _load(session, application_id, candidate.id))
+
+
+@router.get("/{application_id}/tailored-cv")
+async def download_tailored_cv(
+    application_id: uuid.UUID, candidate: CandidateDep, session: SessionDep
+) -> FileResponse:
+    app = await _load(session, application_id, candidate.id)
+    resume = (
+        await session.get(CandidateResume, app.tailored_resume_id)
+        if app.tailored_resume_id
+        else None
+    )
+    if resume is None or not await asyncio.to_thread(Path(resume.storage_path).is_file):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No tailored CV yet")
+    return FileResponse(
+        resume.storage_path, media_type=resume.content_type, filename=resume.original_filename
+    )
